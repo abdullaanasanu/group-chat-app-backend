@@ -8,6 +8,7 @@ var UserSchema = new mongoose.Schema(
       type: String,
       lowercase: true,
       unique: true,
+      index: true,
     },
     passwordHash: { type: String },
 
@@ -17,7 +18,7 @@ var UserSchema = new mongoose.Schema(
 
 UserSchema.methods.generateJWT = function () {
 
-  let token = jwt.sign(
+  const token = jwt.sign(
     {
       data: {
         id: this._id,
@@ -28,4 +29,7 @@ UserSchema.methods.generateJWT = function () {
   return token;
 };
 
-mongoose.model("User", UserSchema);
+const User = mongoose.model("User", UserSchema);
+
+module.exports = User;
+ 

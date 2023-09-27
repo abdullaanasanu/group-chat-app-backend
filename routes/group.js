@@ -28,7 +28,7 @@ router.post(
       return res.status(200).json({
         success: true,
         message: "Group created successfully",
-        group: group,
+        group,
       });
     });
   }
@@ -36,7 +36,7 @@ router.post(
 
 router.get("/", auth.userAuth, async (req, res, next) => {
   try {
-    let groups = await Group.find().lean();
+    let groups = await Group.find().sort({ _id: -1 }).lean();
     groups = await Promise.all(
       groups.map(async (group) => {
         group.totalParticipants = await GroupParticipant.countDocuments({
@@ -48,7 +48,7 @@ router.get("/", auth.userAuth, async (req, res, next) => {
     );
     return res.status(200).json({
       success: true,
-      groups: groups,
+      groups
     });
   } catch (err) {
     console.log(err);
@@ -72,50 +72,13 @@ router.get("/:id", auth.userAuth, async (req, res, next) => {
       group: group._id,
       isActive: true,
     })
-      .populate("user")
+      .populate("user", "name")
       .lean()
       .sort({ updatedAt: -1 });
-      group.chat = await GroupChat.find({ group: group._id }).populate("user", "name").lean()
+    group.chat = await GroupChat.find({ group: group._id }).populate("user", "name").sort({ _id: 1 }).lean()
     return res.status(200).json({
       success: true,
       group: group,
-    });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).json({
-      success: false,
-      message: err,
-    });
-  }
-});
-
-router.get("/chat/:id", auth.userAuth, async (req, res, next) => {
-  try {
-    let chat = await GroupChat.find({ group: req.params.id })
-      .populate("user", "name")
-      .lean();
-
-    return res.status(200).json({
-      success: true,
-      chat: chat,
-    });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).json({
-      success: false,
-      message: err,
-    });
-  }
-});
-
-router.get("/participants/:id", auth.userAuth, async (req, res, next) => {
-  try {
-    let participants = await GroupParticipant.find({ group: req.params.id })
-      .populate("user", "name")
-      .lean();
-    return res.status(200).json({
-      success: true,
-      participants: participants,
     });
   } catch (err) {
     console.log(err);

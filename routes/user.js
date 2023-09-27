@@ -1,11 +1,11 @@
-var mongoose = require("mongoose");
-var router = require("express").Router();
-var bcrypt = require("bcrypt");
-var jwt = require("jsonwebtoken");
-var { body, check, validationResult } = require("express-validator");
+const mongoose = require("mongoose");
+const router = require("express").Router();
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { body, check, validationResult } = require("express-validator");
 
 // models
-var User = mongoose.model("User");
+const User = mongoose.model("User");
 
 // routes
 router.post(
@@ -23,9 +23,10 @@ router.post(
         errors: errors.array(),
       });
     }
-    User.findOne({
-      email: req.body.email,
-    }).then((user) => {
+    const user = await User.findOne({ email: req.body.email });
+    // User.findOne({
+    //   email: req.body.email,
+    // }).then((user) => {
       if (!user) {
         return res.status(400).json({ message: "User not found" });
       }
@@ -50,7 +51,7 @@ router.post(
           }
         }
       );
-    });
+    // });
   }
 );
 

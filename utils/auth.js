@@ -23,6 +23,7 @@ exports.userAuth = (req, res, next) => {
         
         if (err) return next({ status: 401, message: " Invalid Token " });
         let user = await User.findById(decode.data.id);
+        // let user = await User.findOne({ _id: decode.data.id, isActive: true })
         if (!user) return next({ status: 401, message: " Unauthorised Access " });
         req.payload = token;
         req.user = user;

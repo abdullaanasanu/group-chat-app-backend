@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 // Create global app object
-var app = express();
+const app = express();
 
 app.use(cors());
 // app.use(cors({ origin: true, credentials: true }));
@@ -20,13 +20,13 @@ mongoose
   })
   .then(() => console.log("DB Connected"));
 
-require("./models/User");
+const User = require("./models/User");
 require("./models/Group");
 require("./models/GroupParticipant");
 require("./models/GroupChat");
 
 const GroupChat = mongoose.model("GroupChat");
-const User = mongoose.model("User");
+// const User = mongoose.model("User");
 const Group = mongoose.model("Group");
 const GroupParticipant = mongoose.model("GroupParticipant");
 
@@ -104,7 +104,6 @@ io.on("connection", (socket) => {
   //   });
 
   socket.on("new message", (newMessage) => {
-    console.log(newMessage);
     let token = newMessage.token;
     jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
       if (err) {
