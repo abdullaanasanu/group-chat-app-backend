@@ -1,0 +1,8 @@
+Tasks
+
+* typescript conversion
+* Asyn & await instead of callbacks
+* Replace redux with recoil
+* Keys const, var & let based on data user
+* Pagination on Group List & Chat box in scroll to top
+* Use Radix UI
