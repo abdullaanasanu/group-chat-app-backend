@@ -44,7 +44,18 @@ router.get(
   userAuth,
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      let groups = await Group.find().sort({ _id: -1 }).lean();
+      // get all groups with pagination
+      // let groups = await Group.find().sort({ _id: -1 }).lean();
+      const {
+        query: { limit, skip },
+      } = req;
+      const limitQuery = limit ? parseInt(limit as string) : 3;
+      const skipQuery = skip ? parseInt(skip as string) : 0;
+      let groups = await Group.find()
+        .skip(skipQuery)
+        .limit(limitQuery)
+        .sort({ _id: -1 })
+        .lean();
       groups = await Promise.all(
         groups.map(async (group: any) => {
           group.totalParticipants = await GroupParticipant.countDocuments({
@@ -54,9 +65,11 @@ router.get(
           return group;
         })
       );
+      const totalGroups = await Group.countDocuments();
       return res.status(200).json({
         success: true,
         groups,
+        totalGroups
       });
     } catch (err) {
       return res.status(500).json({
@@ -91,13 +104,47 @@ router.get(
         .populate("user", "name")
         .sort({ updatedAt: -1 })
         .lean();
+      // find last 10 messages
       group.chat = await GroupChat.find({ group: group._id })
         .populate("user", "name")
-        .sort({ _id: 1 })
+        .sort({ _id: -1 })
+        .limit(10)
         .lean();
+      group.chat = group.chat.reverse();
       return res.status(200).json({
         success: true,
         group,
+      });
+    } catch (err) {
+      return res.status(500).json({
+        success: false,
+        message: err,
+      });
+    }
+  }
+);
+
+router.get(
+  "/chat/:id",
+  userAuth,
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const {
+        query: { limit, skip },
+      } = req;
+      const limitQuery = limit ? parseInt(limit as string) : 10;
+      const skipQuery = skip ? parseInt(skip as string) : 0;
+      // Find the old messages by skipping new ones
+      const chat = await GroupChat.find({ group: req.params.id })
+        .populate("user", "name")
+        .skip(skipQuery)
+        .limit(limitQuery)
+        .sort({ _id: -1 })
+        .lean();
+      chat.reverse();
+      return res.status(200).json({
+        success: true,
+        chat,
       });
     } catch (err) {
       return res.status(500).json({
